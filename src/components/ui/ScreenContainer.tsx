@@ -1,5 +1,6 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, ViewProps } from 'react-native';
+import { StyleSheet, ViewProps } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import theme from '@theme';
 
 export const ScreenContainer: React.FC<ViewProps> = ({ children, style, ...rest }) => {

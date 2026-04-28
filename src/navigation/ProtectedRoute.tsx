@@ -1,14 +1,14 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { View } from 'react-native';
-import { AuthContext } from '@context/AuthContext';
+import { useAuth } from '@context/AuthContext';
 import AppLoader from '@components/ui/AppLoader';
 
 type Props = { children: React.ReactNode };
 
 export const ProtectedRoute: React.FC<Props> = ({ children }) => {
-  const { user, initializing } = useContext(AuthContext);
+  const { user, initialized } = useAuth();
 
-  if (initializing) return <AppLoader />;
+  if (!initialized) return <AppLoader />;
   if (!user) return <View />; // placeholder for redirect to auth stack
 
   return <>{children}</>;

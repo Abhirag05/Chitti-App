@@ -1,13 +1,14 @@
 import React from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { AuthProvider } from '@context/AuthContext';
-import AppNavigation from '@navigation';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AuthProvider } from './src/context/AuthContext';
+import AppNavigation from './src/navigation';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppNavigation />
-      <StatusBar style="auto" />
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <AppNavigation />
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

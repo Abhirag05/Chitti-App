@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 
-const extra = Constants.manifest?.extra || {};
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 
 export const ENV = {
   FIREBASE_API_KEY: extra.EXPO_PUBLIC_FIREBASE_API_KEY ?? '',
@@ -9,6 +9,8 @@ export const ENV = {
   FIREBASE_STORAGE_BUCKET: extra.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
   FIREBASE_MESSAGING_SENDER_ID: extra.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '',
   FIREBASE_APP_ID: extra.EXPO_PUBLIC_FIREBASE_APP_ID ?? '',
+  GOOGLE_WEB_CLIENT_ID: extra.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
+  GOOGLE_ANDROID_CLIENT_ID: extra.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '',
 };
 
 export default ENV;

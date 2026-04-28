@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import * as FirebaseAuth from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ENV from '@src/config/env';
 
 const firebaseConfig = {
@@ -14,7 +15,24 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-const auth = getAuth(app);
+const { getAuth, initializeAuth } = FirebaseAuth;
+const getReactNativePersistence =
+  (FirebaseAuth as unknown as { getReactNativePersistence?: (storage: unknown) => unknown })
+    .getReactNativePersistence;
+
+let auth: FirebaseAuth.Auth;
+try {
+  if (getReactNativePersistence) {
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage) as FirebaseAuth.Persistence,
+    });
+  } else {
+    auth = getAuth(app);
+  }
+} catch (_error: unknown) {
+  // If auth is already initialized (fast refresh), fall back to existing instance.
+  auth = getAuth(app);
+}
 const db = getFirestore(app);
 
 export class FirebaseService {
