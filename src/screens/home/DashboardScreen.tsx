@@ -1,78 +1,174 @@
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { MaterialIcons } from '@expo/vector-icons';
 import ScreenContainer from '@components/ui/ScreenContainer';
 import AppText from '@components/ui/AppText';
-import AppButton from '@components/ui/AppButton';
+import AppCard from '@components/ui/AppCard';
+import AppHeader from '@components/layout/AppHeader';
 import { useAuth } from '@context/AuthContext';
-import { View, StyleSheet } from 'react-native';
+import { AppDrawerParamList } from '@src/types/navigation';
 import theme from '@theme';
 
 type Props = {
-  navigation: any;
+  navigation: DrawerNavigationProp<AppDrawerParamList, 'Dashboard'>;
 };
 
 /**
- * DashboardScreen - Placeholder for authenticated users
+ * Quick stat card data
+ */
+interface StatCard {
+  label: string;
+  value: string;
+  icon: React.ComponentProps<typeof MaterialIcons>['name'];
+  color: string;
+}
+
+/**
+ * Placeholder stats for dashboard
+ */
+const PLACEHOLDER_STATS: StatCard[] = [
+  { label: 'Total Borrowers', value: '0', icon: 'people', color: theme.colors.accent },
+  { label: 'Due Today', value: '0', icon: 'today', color: theme.colors.warning },
+  { label: 'Overdue', value: '0', icon: 'warning', color: theme.colors.danger },
+  { label: 'Upcoming', value: '0', icon: 'event', color: theme.colors.success },
+];
+
+/**
+ * DashboardScreen - Main overview screen with summary stats
  */
 const DashboardScreen: React.FC<Props> = ({ navigation }) => {
-  const { logout, userProfile } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (err) {
-      console.error('Logout failed:', err);
-    }
-  };
+  const { userProfile } = useAuth();
 
   return (
-    <ScreenContainer>
-      <View style={styles.container}>
-        <AppText variant="h1" style={styles.title}>
-          Dashboard
-        </AppText>
-        {userProfile && (
-          <>
-            <AppText variant="body" style={styles.welcome}>
-              Welcome, {userProfile.fullName}!
-            </AppText>
-            <AppText variant="small" style={styles.email}>
-              {userProfile.email}
-            </AppText>
-          </>
-        )}
+    <View style={styles.flex}>
+      <AppHeader
+        title="Dashboard"
+        onMenuPress={() => navigation.openDrawer()}
+      />
+      <ScreenContainer style={styles.container}>
+        {/* Welcome Section */}
+        <View style={styles.welcomeSection}>
+          <AppText variant="h2" style={styles.greeting}>
+            Welcome back,
+          </AppText>
+          <AppText variant="h1" style={styles.userName}>
+            {userProfile?.fullName || 'User'}
+          </AppText>
+          <AppText variant="small" style={styles.subtitle}>
+            Here's your lending overview
+          </AppText>
+        </View>
 
-        <View style={styles.spacer} />
+        {/* Stats Grid */}
+        <View style={styles.statsGrid}>
+          {React.Children.toArray(PLACEHOLDER_STATS.map((stat) => (
+            <View style={styles.statCardWrapper}>
+              <AppCard style={styles.statCardInner}>
+                <View style={[styles.statIconContainer, { backgroundColor: `${stat.color}15` }]}>
+                  <MaterialIcons name={stat.icon} size={24} color={stat.color} />
+                </View>
+                <AppText variant="h2" style={styles.statValue}>
+                  {stat.value}
+                </AppText>
+                <AppText variant="small" style={styles.statLabel}>
+                  {stat.label}
+                </AppText>
+              </AppCard>
+            </View>
+          )))}
+        </View>
 
-        <AppButton title="Logout" onPress={handleLogout} style={styles.logoutButton} />
-      </View>
-    </ScreenContainer>
+        {/* Placeholder Activity Section */}
+        <View style={styles.activitySection}>
+          <AppText variant="h3" style={styles.sectionTitle}>
+            Recent Activity
+          </AppText>
+          <AppCard style={styles.emptyActivity}>
+            <MaterialIcons name="history" size={40} color={theme.colors.muted} />
+            <AppText variant="body" style={styles.emptyText}>
+              No recent activity
+            </AppText>
+            <AppText variant="small" style={styles.emptySubtext}>
+              Your lending activity will appear here
+            </AppText>
+          </AppCard>
+        </View>
+      </ScreenContainer>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
+    padding: theme.spacing.md,
   },
-  title: {
+  welcomeSection: {
     marginBottom: theme.spacing.lg,
-    fontWeight: 'bold',
   },
-  welcome: {
-    marginBottom: theme.spacing.md,
-    textAlign: 'center',
+  greeting: {
+    color: theme.colors.muted,
+    fontWeight: '400',
   },
-  email: {
+  userName: {
+    marginTop: theme.spacing.xxs,
+  },
+  subtitle: {
+    color: theme.colors.muted,
+    marginTop: theme.spacing.xxs,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -theme.spacing.xxs,
+    marginBottom: theme.spacing.lg,
+  },
+  statCardWrapper: {
+    width: '48%',
+    marginHorizontal: '1%',
+    marginBottom: theme.spacing.sm,
+  },
+  statCardInner: {
+    alignItems: 'center',
+    paddingVertical: theme.spacing.md,
+  },
+  statIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing.xs,
+  },
+  statValue: {
+    marginBottom: theme.spacing.xxs,
+  },
+  statLabel: {
     color: theme.colors.muted,
     textAlign: 'center',
   },
-  spacer: {
+  activitySection: {
     flex: 1,
   },
-  logoutButton: {
-    width: '100%',
+  sectionTitle: {
+    marginBottom: theme.spacing.sm,
+  },
+  emptyActivity: {
+    alignItems: 'center',
+    paddingVertical: theme.spacing.xl,
+  },
+  emptyText: {
+    marginTop: theme.spacing.sm,
+    color: theme.colors.muted,
+  },
+  emptySubtext: {
+    marginTop: theme.spacing.xxs,
+    color: theme.colors.muted,
   },
 });
 

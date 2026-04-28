@@ -16,10 +16,12 @@ module.exports = function(api) {
             '@navigation': './src/navigation',
             '@context': './src/context',
             '@screens': './src/screens',
-            '@types': './src/types'
+            '@types': './src/types',
+            '@constants': './src/constants'
           }
         }
-      ]
+      ],
+      'react-native-reanimated/plugin',
     ],
   };
 };

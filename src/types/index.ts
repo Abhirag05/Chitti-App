@@ -22,3 +22,14 @@ export type {
   AuthContextType,
   AuthResponse,
 } from './auth';
+
+// Re-export navigation types
+export type {
+  AuthStackParamList,
+  AppDrawerParamList,
+  BorrowersStackParamList,
+  RootStackParamList,
+  AuthScreenNavigationProp,
+  AppDrawerNavigationProp,
+  BorrowersStackNavigationProp,
+} from './navigation';
