@@ -6,8 +6,10 @@ import ScreenContainer from '@components/ui/ScreenContainer';
 import AppHeader from '@components/layout/AppHeader';
 import AppLoader from '@components/ui/AppLoader';
 import EmptyState from '@components/ui/EmptyState';
+import ErrorState from '@components/ui/ErrorState';
 import { InstallmentListItem } from '@components/installments';
 import { useAuth } from '@context/AuthContext';
+import errorHandler from '@services/errorHandler';
 import loanService from '@services/loanService';
 import trackingService from '@services/trackingService';
 import { InstallmentTrackingItem } from '@src/models';
@@ -24,6 +26,7 @@ const DueTodayScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [markingId, setMarkingId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadInstallments = async () => {
     if (!user?.uid) {
@@ -36,8 +39,10 @@ const DueTodayScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const response = await trackingService.getDueTodayInstallments(user.uid);
       setInstallments(response);
+      setLoadError(null);
     } catch (error) {
-      console.error('Failed to load due today installments:', error);
+      errorHandler.log(error, 'DueTodayScreen.loadInstallments');
+      setLoadError(errorHandler.format(error));
       setInstallments([]);
     } finally {
       setLoading(false);
@@ -74,6 +79,17 @@ const DueTodayScreen: React.FC<Props> = ({ navigation }) => {
 
   if (loading) {
     return <AppLoader />;
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.flex}>
+        <AppHeader title="Due Today" onMenuPress={() => navigation.openDrawer()} />
+        <ScreenContainer style={styles.container}>
+          <ErrorState title="Unable to load dues" message={loadError} onRetry={() => void loadInstallments()} />
+        </ScreenContainer>
+      </View>
+    );
   }
 
   return (

@@ -7,11 +7,14 @@ import AppHeader from '@components/layout/AppHeader';
 import AppInput from '@components/ui/AppInput';
 import AppLoader from '@components/ui/AppLoader';
 import EmptyState from '@components/ui/EmptyState';
+import ErrorState from '@components/ui/ErrorState';
 import { BorrowerCard } from '@components/borrowers';
 import { useAuth } from '@context/AuthContext';
+import errorHandler from '@services/errorHandler';
 import borrowerService from '@services/borrowerService';
 import { BorrowersStackParamList } from '@src/types/navigation';
 import { BorrowerSummary } from '@src/models';
+import useDebouncedValue from '@src/hooks/useDebouncedValue';
 import theme from '@theme';
 
 type Props = NativeStackScreenProps<BorrowersStackParamList, 'BorrowersList'>;
@@ -22,6 +25,9 @@ const BorrowersScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const debouncedSearch = useDebouncedValue(search, 250);
 
   const loadBorrowers = async () => {
     if (!user?.uid) {
@@ -33,8 +39,10 @@ const BorrowersScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const items = await borrowerService.getBorrowersByUserWithSummary(user.uid);
       setBorrowers(items);
+      setLoadError(null);
     } catch (error) {
-      console.error('Failed to load borrowers:', error);
+      errorHandler.log(error, 'BorrowersScreen.loadBorrowers');
+      setLoadError(errorHandler.format(error));
       setBorrowers([]);
     } finally {
       setLoading(false);
@@ -47,7 +55,7 @@ const BorrowersScreen: React.FC<Props> = ({ navigation }) => {
   }, [user?.uid]);
 
   const filteredBorrowers = useMemo(() => {
-    const term = search.trim().toLowerCase();
+    const term = debouncedSearch.trim().toLowerCase();
     if (!term) {
       return borrowers;
     }
@@ -58,10 +66,31 @@ const BorrowersScreen: React.FC<Props> = ({ navigation }) => {
         borrower.phoneNumber.toLowerCase().includes(term)
       );
     });
-  }, [borrowers, search]);
+  }, [borrowers, debouncedSearch]);
 
   if (loading) {
     return <AppLoader />;
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.flex}>
+        <AppHeader
+          title="Borrowers"
+          onMenuPress={() => navigation.getParent()?.dispatch(DrawerActions.openDrawer())}
+          actions={[
+            {
+              icon: 'person-add',
+              onPress: () => navigation.getParent()?.getParent()?.navigate('AddBorrower' as never),
+              accessibilityLabel: 'Add new borrower',
+            },
+          ]}
+        />
+        <ScreenContainer style={styles.container}>
+          <ErrorState title="Unable to load borrowers" message={loadError} onRetry={() => void loadBorrowers()} />
+        </ScreenContainer>
+      </View>
+    );
   }
 
   return (
@@ -88,8 +117,8 @@ const BorrowersScreen: React.FC<Props> = ({ navigation }) => {
 
         {filteredBorrowers.length === 0 ? (
           <EmptyState
-            title={search ? 'No matching borrowers' : 'No borrowers yet'}
-            subtitle={search ? 'Try a different name or phone number.' : 'Start by creating a borrower and loan.'}
+            title={debouncedSearch ? 'No matching borrowers' : 'No borrowers yet'}
+            subtitle={debouncedSearch ? 'Try a different name or phone number.' : 'Start by creating a borrower and loan.'}
           />
         ) : (
           <FlatList

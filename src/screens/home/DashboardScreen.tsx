@@ -7,9 +7,11 @@ import AppText from '@components/ui/AppText';
 import AppHeader from '@components/layout/AppHeader';
 import AppLoader from '@components/ui/AppLoader';
 import EmptyState from '@components/ui/EmptyState';
+import ErrorState from '@components/ui/ErrorState';
 import { StatCard } from '@components/dashboard';
 import { InstallmentListItem } from '@components/installments';
 import { useAuth } from '@context/AuthContext';
+import errorHandler from '@services/errorHandler';
 import trackingService from '@services/trackingService';
 import { AppDrawerParamList } from '@src/types/navigation';
 import { DashboardStats } from '@src/models';
@@ -29,6 +31,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadDashboard = async () => {
     if (!user?.uid) {
@@ -41,8 +44,10 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const response = await trackingService.getDashboardStats(user.uid);
       setStats(response);
+      setLoadError(null);
     } catch (error) {
-      console.error('Failed to load dashboard stats:', error);
+      errorHandler.log(error, 'DashboardScreen.loadDashboard');
+      setLoadError(errorHandler.format(error));
       setStats(null);
     } finally {
       setLoading(false);
@@ -62,6 +67,17 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
   if (loading) {
     return <AppLoader />;
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.flex}>
+        <AppHeader title="Dashboard" onMenuPress={() => navigation.openDrawer()} />
+        <ScreenContainer style={styles.centerContent}>
+          <ErrorState title="Unable to load dashboard" message={loadError} onRetry={() => void loadDashboard()} />
+        </ScreenContainer>
+      </View>
+    );
   }
 
   if (!stats) {

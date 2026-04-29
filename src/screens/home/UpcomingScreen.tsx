@@ -7,9 +7,11 @@ import AppText from '@components/ui/AppText';
 import AppHeader from '@components/layout/AppHeader';
 import AppLoader from '@components/ui/AppLoader';
 import EmptyState from '@components/ui/EmptyState';
+import ErrorState from '@components/ui/ErrorState';
 import { DatePickerField } from '@components/forms';
 import { InstallmentListItem } from '@components/installments';
 import { useAuth } from '@context/AuthContext';
+import errorHandler from '@services/errorHandler';
 import trackingService from '@services/trackingService';
 import { InstallmentTrackingItem } from '@src/models';
 import { AppDrawerParamList } from '@src/types/navigation';
@@ -37,6 +39,7 @@ const UpcomingScreen: React.FC<Props> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [customStart, setCustomStart] = useState(new Date(Date.now() + 24 * 60 * 60 * 1000));
   const [customEnd, setCustomEnd] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const activeRange = useMemo(() => {
     if (filter === 'tomorrow') {
@@ -65,8 +68,10 @@ const UpcomingScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const response = await trackingService.getUpcomingInstallments(user.uid, activeRange);
       setInstallments(response);
+      setLoadError(null);
     } catch (error) {
-      console.error('Failed to load upcoming installments:', error);
+      errorHandler.log(error, 'UpcomingScreen.loadInstallments');
+      setLoadError(errorHandler.format(error));
       setInstallments([]);
     } finally {
       setLoading(false);
@@ -86,6 +91,17 @@ const UpcomingScreen: React.FC<Props> = ({ navigation }) => {
 
   if (loading) {
     return <AppLoader />;
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.flex}>
+        <AppHeader title="Upcoming" onMenuPress={() => navigation.openDrawer()} />
+        <ScreenContainer style={styles.container}>
+          <ErrorState title="Unable to load upcoming installments" message={loadError} onRetry={() => void loadInstallments()} />
+        </ScreenContainer>
+      </View>
+    );
   }
 
   return (

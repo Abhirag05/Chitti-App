@@ -10,7 +10,33 @@ if (fs.existsSync('.env')) {
 module.exports = ({ config }) => {
   return {
     ...config,
+    name: 'Chitti App',
+    slug: 'chitti-app',
+    version: '1.0.0',
+    icon: './assets/icon.png',
+    splash: {
+      image: './assets/splash-icon.png',
+      resizeMode: 'contain',
+      backgroundColor: '#ffffff',
+    },
     plugins: [...(config.plugins || []), 'expo-web-browser', 'expo-font', '@react-native-community/datetimepicker'],
+    android: {
+      ...(config.android || {}),
+      package: 'com.chitti.app',
+      adaptiveIcon: {
+        foregroundImage: './assets/adaptive-icon.png',
+        backgroundColor: '#ffffff',
+      },
+      edgeToEdgeEnabled: true,
+    },
+    ios: {
+      ...(config.ios || {}),
+      supportsTablet: true,
+    },
+    web: {
+      ...(config.web || {}),
+      favicon: './assets/favicon.png',
+    },
     extra: {
       EXPO_PUBLIC_FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',
       EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || '',

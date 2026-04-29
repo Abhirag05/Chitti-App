@@ -7,22 +7,17 @@ import AppText from '@components/ui/AppText';
 import AppCard from '@components/ui/AppCard';
 import AppLoader from '@components/ui/AppLoader';
 import EmptyState from '@components/ui/EmptyState';
+import ErrorState from '@components/ui/ErrorState';
 import { InstallmentItem } from '@components/installments';
 import { useAuth } from '@context/AuthContext';
+import errorHandler from '@services/errorHandler';
 import loanService from '@services/loanService';
 import { BorrowersStackParamList } from '@src/types/navigation';
 import { LoanDetailView } from '@src/models';
+import { formatCurrency, formatDate } from '@src/utils/formatters';
 import theme from '@theme';
 
 type Props = NativeStackScreenProps<BorrowersStackParamList, 'LoanDetails'>;
-
-const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
-const formatDate = (value: number): string =>
-  new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(value));
 
 const LoanDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const { user } = useAuth();
@@ -30,6 +25,7 @@ const LoanDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [markingId, setMarkingId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadLoan = async () => {
     if (!user?.uid) {
@@ -40,8 +36,10 @@ const LoanDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     try {
       const response = await loanService.getLoanDetail(user.uid, route.params.loanId);
       setDetails(response);
+      setLoadError(null);
     } catch (error) {
-      console.error('Failed to load loan details:', error);
+      errorHandler.log(error, 'LoanDetailScreen.loadLoan');
+      setLoadError(errorHandler.format(error));
       setDetails(null);
     } finally {
       setLoading(false);
@@ -73,6 +71,23 @@ const LoanDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
   if (loading) {
     return <AppLoader />;
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.flex}>
+        <AppHeader
+          title="Loan Details"
+          showMenuToggle
+          leftIcon="arrow-back"
+          leftAccessibilityLabel="Go back"
+          onLeftPress={() => navigation.goBack()}
+        />
+        <ScreenContainer style={styles.container}>
+          <ErrorState title="Unable to load loan" message={loadError} onRetry={() => void loadLoan()} />
+        </ScreenContainer>
+      </View>
+    );
   }
 
   return (
