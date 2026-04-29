@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Chitti App",
-    "slug": "Chitti-App",
+    "slug": "chitti-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,9 +12,15 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.abhirag.chittiapp"
     },
     "android": {
+      "package": "com.abhirag.chittiapp",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -23,6 +29,19 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyAGwBsREuyhLw_13SpkT03nRtWQav7QJqo",
+      "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "chitti-app-ebb83.firebaseapp.com",
+      "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "chitti-app-ebb83",
+      "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "chitti-app-ebb83.firebasestorage.app",
+      "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "212447830585",
+      "EXPO_PUBLIC_FIREBASE_APP_ID": "1:212447830585:web:36967b0a0b8c1f1523a3e8",
+      "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "212447830585-426selv8gcl7t627r0hvjjnj93po0esm.apps.googleusercontent.com",
+      "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "YOUR_ANDROID_CLIENT_ID",
+      "eas": {
+        "projectId": "0b93840e-fa34-430f-88d6-0039b7be74d1"
+      }
     }
   }
 }
