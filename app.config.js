@@ -10,7 +10,7 @@ if (fs.existsSync('.env')) {
 module.exports = ({ config }) => {
   return {
     ...config,
-    plugins: [...(config.plugins || []), 'expo-web-browser'],
+    plugins: [...(config.plugins || []), 'expo-web-browser', 'expo-font', '@react-native-community/datetimepicker'],
     extra: {
       EXPO_PUBLIC_FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',
       EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || '',

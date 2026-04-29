@@ -8,6 +8,7 @@ import { CustomDrawerContent } from '@components/layout';
 import { AppRoutes } from '@src/constants/navigation';
 import { AuthStackParamList, AppDrawerParamList } from '@src/types/navigation';
 import theme from '@theme';
+import BorrowersNavigator from './BorrowersNavigator';
 
 // Auth Screens
 import LoginScreen from '@screens/auth/LoginScreen';
@@ -65,7 +66,7 @@ const AppNavigator = () => {
       }}
     >
       <Drawer.Screen name={AppRoutes.Dashboard} component={DashboardScreen} />
-      <Drawer.Screen name={AppRoutes.Borrowers} component={BorrowersScreen} />
+      <Drawer.Screen name={AppRoutes.Borrowers} component={BorrowersNavigator} />
       <Drawer.Screen name={AppRoutes.DueToday} component={DueTodayScreen} />
       <Drawer.Screen name={AppRoutes.Overdue} component={OverdueScreen} />
       <Drawer.Screen name={AppRoutes.Upcoming} component={UpcomingScreen} />

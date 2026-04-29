@@ -19,6 +19,12 @@ type Props = {
   title: string;
   /** Callback for the menu toggle button */
   onMenuPress?: () => void;
+  /** Optional icon for the leading action button */
+  leftIcon?: React.ComponentProps<typeof MaterialIcons>['name'];
+  /** Optional accessibility label for the leading action button */
+  leftAccessibilityLabel?: string;
+  /** Optional callback for the leading action button */
+  onLeftPress?: () => void;
   /** Optional action buttons on the right side */
   actions?: ActionButton[];
   /** Whether to show the menu toggle button */
@@ -33,6 +39,9 @@ type Props = {
 const AppHeader: React.FC<Props> = ({
   title,
   onMenuPress,
+  leftIcon = 'menu',
+  leftAccessibilityLabel = 'Open navigation menu',
+  onLeftPress,
   actions = [],
   showMenuToggle = true,
   style,
@@ -43,15 +52,15 @@ const AppHeader: React.FC<Props> = ({
     <View style={[styles.container, { paddingTop: insets.top + theme.spacing.xs }, style]}>
       <View style={styles.content}>
         {/* Left: Menu Toggle */}
-        {showMenuToggle && onMenuPress ? (
+        {showMenuToggle && (onMenuPress || onLeftPress) ? (
           <TouchableOpacity
             style={styles.iconButton}
-            onPress={onMenuPress}
+            onPress={onLeftPress || onMenuPress}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel="Open navigation menu"
+            accessibilityLabel={leftAccessibilityLabel}
             accessibilityRole="button"
           >
-            <MaterialIcons name="menu" size={24} color={theme.colors.text} />
+            <MaterialIcons name={leftIcon} size={24} color={theme.colors.text} />
           </TouchableOpacity>
         ) : (
           <View style={styles.iconButton} />

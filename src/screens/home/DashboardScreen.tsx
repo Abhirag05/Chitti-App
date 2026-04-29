@@ -62,21 +62,25 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
-          {React.Children.toArray(PLACEHOLDER_STATS.map((stat) => (
-            <View style={styles.statCardWrapper}>
-              <AppCard style={styles.statCardInner}>
-                <View style={[styles.statIconContainer, { backgroundColor: `${stat.color}15` }]}>
-                  <MaterialIcons name={stat.icon} size={24} color={stat.color} />
-                </View>
-                <AppText variant="h2" style={styles.statValue}>
-                  {stat.value}
-                </AppText>
-                <AppText variant="small" style={styles.statLabel}>
-                  {stat.label}
-                </AppText>
-              </AppCard>
-            </View>
-          )))}
+          {PLACEHOLDER_STATS.map((stat) =>
+            React.createElement(
+              View,
+              { key: stat.label, style: styles.statCardWrapper } as any,
+              React.createElement(
+                AppCard,
+                { style: styles.statCardInner },
+                React.createElement(
+                  View,
+                  {
+                    style: [styles.statIconContainer, { backgroundColor: `${stat.color}15` }],
+                  },
+                  React.createElement(MaterialIcons, { name: stat.icon, size: 24, color: stat.color })
+                ),
+                React.createElement(AppText, { variant: 'h2', style: styles.statValue }, stat.value),
+                React.createElement(AppText, { variant: 'small', style: styles.statLabel }, stat.label)
+              )
+            )
+          )}
         </View>
 
         {/* Placeholder Activity Section */}

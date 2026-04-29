@@ -1,47 +1,119 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
-import { MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { DrawerActions } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '@components/ui/ScreenContainer';
-import AppText from '@components/ui/AppText';
-import AppCard from '@components/ui/AppCard';
 import AppHeader from '@components/layout/AppHeader';
-import { AppDrawerParamList } from '@src/types/navigation';
+import AppInput from '@components/ui/AppInput';
+import AppLoader from '@components/ui/AppLoader';
+import EmptyState from '@components/ui/EmptyState';
+import { BorrowerCard } from '@components/borrowers';
+import { useAuth } from '@context/AuthContext';
+import borrowerService from '@services/borrowerService';
+import { BorrowersStackParamList } from '@src/types/navigation';
+import { BorrowerSummary } from '@src/models';
 import theme from '@theme';
 
-type Props = {
-  navigation: DrawerNavigationProp<AppDrawerParamList, 'Borrowers'>;
-};
+type Props = NativeStackScreenProps<BorrowersStackParamList, 'BorrowersList'>;
 
-/**
- * BorrowersScreen - Lists all borrowers (placeholder)
- */
 const BorrowersScreen: React.FC<Props> = ({ navigation }) => {
+  const { user } = useAuth();
+  const [borrowers, setBorrowers] = useState<BorrowerSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const loadBorrowers = async () => {
+    if (!user?.uid) {
+      setBorrowers([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const items = await borrowerService.getBorrowersByUserWithSummary(user.uid);
+      setBorrowers(items);
+    } catch (error) {
+      console.error('Failed to load borrowers:', error);
+      setBorrowers([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadBorrowers();
+  }, [user?.uid]);
+
+  const filteredBorrowers = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) {
+      return borrowers;
+    }
+
+    return borrowers.filter((borrower) => {
+      return (
+        borrower.fullName.toLowerCase().includes(term) ||
+        borrower.phoneNumber.toLowerCase().includes(term)
+      );
+    });
+  }, [borrowers, search]);
+
+  if (loading) {
+    return <AppLoader />;
+  }
+
   return (
     <View style={styles.flex}>
       <AppHeader
         title="Borrowers"
-        onMenuPress={() => navigation.openDrawer()}
+        onMenuPress={() => navigation.getParent()?.dispatch(DrawerActions.openDrawer())}
         actions={[
           {
             icon: 'person-add',
-            onPress: () => navigation.navigate('AddBorrower'),
+            onPress: () => navigation.getParent()?.getParent()?.navigate('AddBorrower' as never),
             accessibilityLabel: 'Add new borrower',
           },
         ]}
       />
+
       <ScreenContainer style={styles.container}>
-        <AppCard style={styles.emptyCard}>
-          <View style={styles.iconContainer}>
-            <MaterialIcons name="people" size={48} color={theme.colors.accent} />
-          </View>
-          <AppText variant="h2" style={styles.emptyTitle}>
-            No Borrowers Yet
-          </AppText>
-          <AppText variant="body" style={styles.emptySubtext}>
-            Start by adding your first borrower to manage their loans and payments.
-          </AppText>
-        </AppCard>
+        <AppInput
+          placeholder="Search by name or phone"
+          value={search}
+          onChangeText={setSearch}
+          style={styles.searchInput}
+        />
+
+        {filteredBorrowers.length === 0 ? (
+          <EmptyState
+            title={search ? 'No matching borrowers' : 'No borrowers yet'}
+            subtitle={search ? 'Try a different name or phone number.' : 'Start by creating a borrower and loan.'}
+          />
+        ) : (
+          <FlatList
+            data={filteredBorrowers}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <BorrowerCard
+                borrower={item}
+                onPress={() => navigation.navigate('BorrowerDetails', { borrowerId: item.id })}
+              />
+            )}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => {
+                  setRefreshing(true);
+                  void loadBorrowers();
+                }}
+              />
+            }
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </ScreenContainer>
     </View>
   );
@@ -54,31 +126,13 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: theme.spacing.md,
+    paddingTop: theme.spacing.md,
   },
-  emptyCard: {
-    alignItems: 'center',
-    paddingVertical: theme.spacing.xl,
-    paddingHorizontal: theme.spacing.lg,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: `${theme.colors.accent}15`,
-    alignItems: 'center',
-    justifyContent: 'center',
+  searchInput: {
     marginBottom: theme.spacing.md,
   },
-  emptyTitle: {
-    marginBottom: theme.spacing.sm,
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    color: theme.colors.muted,
-    textAlign: 'center',
-    lineHeight: 22,
+  listContent: {
+    paddingBottom: theme.spacing.xl,
   },
 });
 
