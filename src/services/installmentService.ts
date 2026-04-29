@@ -1,5 +1,6 @@
 import installmentRepository from '@src/repositories/installmentRepository';
 import { Installment, InstallmentCreateInput, InstallmentWithStatus } from '@src/models';
+import { normalizeDate } from '@src/utils/dateHelpers';
 
 const roundToTwo = (value: number): number => Math.round(value * 100) / 100;
 
@@ -8,7 +9,7 @@ const getEffectiveStatus = (installment: Installment): InstallmentWithStatus['ef
     return 'paid';
   }
 
-  return Date.now() > installment.dueDate ? 'overdue' : 'pending';
+  return normalizeDate(Date.now()) > normalizeDate(installment.dueDate) ? 'overdue' : 'pending';
 };
 
 class InstallmentService {

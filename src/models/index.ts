@@ -7,4 +7,6 @@ export type {
 	LoanWithProgress,
 	InstallmentWithStatus,
 	LoanDetailView,
+	InstallmentTrackingItem,
+	DashboardStats,
 } from './tracking';

@@ -24,3 +24,17 @@ export type LoanDetailView = {
   loan: LoanWithProgress;
   installments: InstallmentWithStatus[];
 };
+
+export type InstallmentTrackingItem = InstallmentWithStatus & {
+  daysOverdue: number;
+  loanReference: string;
+};
+
+export type DashboardStats = {
+  totalActiveLoans: number;
+  totalOutstandingAmount: number;
+  dueTodayCount: number;
+  overdueCount: number;
+  completedLoansCount: number;
+  recentPayments: InstallmentTrackingItem[];
+};
