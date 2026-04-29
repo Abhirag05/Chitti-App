@@ -31,10 +31,12 @@ class TrackingService {
     const totalActiveLoans = loans.filter((loan) => loan.status === 'active').length;
     const completedLoansCount = loans.filter((loan) => loan.status === 'completed').length;
     const totalOutstandingAmount = outstandingInstallments.reduce((total, installment) => total + installment.amount, 0);
+    const totalProfit = loans.reduce((total, loan) => total + loan.profitAmount, 0);
 
     return {
       totalActiveLoans,
       totalOutstandingAmount,
+      totalProfit,
       dueTodayCount: dueTodayInstallments.length,
       overdueCount: overdueInstallments.length,
       completedLoansCount,

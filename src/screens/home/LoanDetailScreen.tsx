@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, View, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AppHeader from '@components/layout/AppHeader';
 import ScreenContainer from '@components/ui/ScreenContainer';
@@ -56,17 +56,30 @@ const LoanDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       return;
     }
 
-    try {
-      setMarkingId(installmentId);
-      const response = await loanService.markInstallmentAsPaid(user.uid, details.loan.id, installmentId);
-      if (response) {
-        setDetails(response);
-      }
-    } catch (error) {
-      console.error('Failed to mark installment as paid:', error);
-    } finally {
-      setMarkingId(null);
-    }
+    Alert.alert(
+      'Confirm Payment',
+      'Are you sure you want to mark this installment as paid?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Mark as Paid',
+          style: 'default',
+          onPress: async () => {
+            try {
+              setMarkingId(installmentId);
+              const response = await loanService.markInstallmentAsPaid(user.uid, details.loan.id, installmentId);
+              if (response) {
+                setDetails(response);
+              }
+            } catch (error) {
+              console.error('Failed to mark installment as paid:', error);
+            } finally {
+              setMarkingId(null);
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (loading) {

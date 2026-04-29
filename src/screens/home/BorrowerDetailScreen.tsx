@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AppHeader from '@components/layout/AppHeader';
 import ScreenContainer from '@components/ui/ScreenContainer';
@@ -58,6 +59,12 @@ const BorrowerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   useEffect(() => {
     void loadData();
   }, [route.params.borrowerId, user?.uid]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadData();
+    }, [route.params.borrowerId, user?.uid])
+  );
 
   const totalOutstanding = useMemo(
     () => loans.reduce((total, loan) => total + loan.outstandingAmount, 0),
@@ -131,7 +138,7 @@ const BorrowerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           <EmptyState title="No loans yet" subtitle="This borrower does not have any loans assigned yet." />
         ) : (
           <FlatList
-            data={loans}
+            data={loans.slice(0, 10)}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <LoanCard

@@ -120,6 +120,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         <View style={styles.statsGrid}>
+          <StatCard label="Total Profit" value={formatCurrency(stats.totalProfit)} icon="trending-up" tint={theme.colors.success} />
           <StatCard label="Active Loans" value={String(stats.totalActiveLoans)} icon="payments" tint={theme.colors.accent} />
           <StatCard label="Outstanding" value={formatCurrency(stats.totalOutstandingAmount)} icon="account-balance-wallet" tint={theme.colors.warning} />
           <StatCard label="Due Today" value={String(stats.dueTodayCount)} icon="today" tint={theme.colors.warning} />

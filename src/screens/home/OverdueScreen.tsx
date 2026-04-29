@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, View, Alert } from 'react-native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect } from '@react-navigation/native';
 import ScreenContainer from '@components/ui/ScreenContainer';
@@ -65,16 +65,29 @@ const OverdueScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    try {
-      setMarkingId(item.id);
-      await loanService.markInstallmentAsPaid(user.uid, item.loanId, item.id);
-      setInstallments((prev) => prev.filter((installment) => installment.id !== item.id));
-    } catch (error) {
-      console.error('Failed to mark installment as paid:', error);
-    } finally {
-      setMarkingId(null);
-      void loadInstallments();
-    }
+    Alert.alert(
+      'Confirm Payment',
+      'Are you sure you want to mark this installment as paid?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Mark as Paid',
+          style: 'default',
+          onPress: async () => {
+            try {
+              setMarkingId(item.id);
+              await loanService.markInstallmentAsPaid(user.uid, item.loanId, item.id);
+              setInstallments((prev) => prev.filter((installment) => installment.id !== item.id));
+            } catch (error) {
+              console.error('Failed to mark installment as paid:', error);
+            } finally {
+              setMarkingId(null);
+              void loadInstallments();
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (loading) {

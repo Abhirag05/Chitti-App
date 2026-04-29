@@ -60,14 +60,18 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     if (!error) {
-      setAuthFieldError(null);
-      setAuthErrorMessage(null);
       return;
     }
 
     // Map known auth messages to field-level errors for better UX
     const lower = error.toLowerCase();
-    if (lower.includes('password') || lower.includes('incorrect password') || lower.includes('wrong-password')) {
+    if (
+      lower.includes('password') ||
+      lower.includes('incorrect password') ||
+      lower.includes('wrong-password') ||
+      lower.includes('invalid credential') ||
+      lower.includes('incorrect email or password')
+    ) {
       setAuthFieldError('password');
       setAuthErrorMessage(error);
     } else if (lower.includes('user not found') || lower.includes('no user') || lower.includes('invalid email')) {
@@ -119,11 +123,9 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                       value={value}
                       onChangeText={(v) => {
                         onChange(v);
-                        // clear field-level auth errors when user edits
-                        if (authFieldError === 'email') {
-                          setAuthFieldError(null);
-                          setAuthErrorMessage(null);
-                        }
+                        // clear auth errors when user edits
+                        setAuthFieldError(null);
+                        setAuthErrorMessage(null);
                         clearError();
                       }}
                       keyboardType="email-address"
@@ -149,10 +151,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                       value={value}
                       onChangeText={(v) => {
                         onChange(v);
-                        if (authFieldError === 'password') {
-                          setAuthFieldError(null);
-                          setAuthErrorMessage(null);
-                        }
+                        setAuthFieldError(null);
+                        setAuthErrorMessage(null);
                         clearError();
                       }}
                       editable={!loading}

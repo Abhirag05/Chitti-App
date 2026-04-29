@@ -43,6 +43,17 @@ export class InstallmentRepository extends BaseRepository {
     ]);
   }
 
+  async deleteInstallmentsByLoan(ownerId: string, loanId: string): Promise<void> {
+    const installments = await this.getInstallmentsByLoan(ownerId, loanId);
+    if (installments.length === 0) return;
+
+    const batch = writeBatch(this.db);
+    installments.forEach((installment) => {
+      batch.delete(this.docRef(installment.id));
+    });
+    await batch.commit();
+  }
+
   async getInstallmentsByOwnerDueDateRange(
     ownerId: string,
     startDate: number,

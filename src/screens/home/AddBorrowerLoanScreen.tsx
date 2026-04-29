@@ -163,6 +163,10 @@ const AddBorrowerLoanScreen: React.FC<Props> = ({ navigation }) => {
 
     if (mode === 'new') {
       setValue('borrowerId', '', { shouldValidate: true });
+      setValue('phoneNumber', '', { shouldValidate: true });
+      setValue('fullName', '', { shouldValidate: true });
+      setValue('address', '', { shouldValidate: true });
+      setValue('reference', '', { shouldValidate: true });
       setAutoDetectMessage(null);
       setSelectedBorrower(null);
       return;
@@ -339,7 +343,7 @@ const AddBorrowerLoanScreen: React.FC<Props> = ({ navigation }) => {
                     render={({ field: { value, onChange } }) => (
                       <View style={styles.fieldSpacing}>
                         <AppInput
-                          label="Reference"
+                          label="Reference (Optional)"
                           value={value}
                           onChangeText={onChange}
                           placeholder="Enter reference name"
@@ -404,7 +408,7 @@ const AddBorrowerLoanScreen: React.FC<Props> = ({ navigation }) => {
                 name="startDate"
                 render={({ field: { value, onChange } }) => (
                   <DatePickerField
-                    label="Start Date"
+                    label="Given Date"
                     value={value}
                     onChange={(nextDate) => {
                       onChange(nextDate);

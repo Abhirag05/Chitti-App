@@ -1,4 +1,4 @@
-import { CollectionReference, DocumentData, QueryConstraint, collection, doc, getDoc, getDocs, query, setDoc } from 'firebase/firestore';
+import { CollectionReference, DocumentData, QueryConstraint, collection, doc, getDoc, getDocs, query, setDoc, deleteDoc } from 'firebase/firestore';
 import FirebaseService from '@services/firebase';
 
 export abstract class BaseRepository {
@@ -35,5 +35,9 @@ export abstract class BaseRepository {
   async getMany<T>(constraints: QueryConstraint[] = []): Promise<T[]> {
     const snapshot = await getDocs(query(this.collectionRef(), ...constraints));
     return snapshot.docs.map((documentSnapshot) => documentSnapshot.data() as T);
+  }
+
+  async delete(id: string): Promise<void> {
+    await deleteDoc(this.docRef(id));
   }
 }

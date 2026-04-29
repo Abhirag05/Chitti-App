@@ -65,13 +65,7 @@ export const borrowerLoanFormSchema = z
         });
       }
 
-      if (!value.reference?.trim()) {
-        context.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Reference is required',
-          path: ['reference'],
-        });
-      }
+
     }
 
     if (principalAmount <= 0) {
@@ -101,7 +95,7 @@ export const borrowerLoanFormSchema = z
     if (value.firstDueDate < value.startDate) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'First due date cannot be before the start date',
+        message: 'First due date cannot be before the given date',
         path: ['firstDueDate'],
       });
     }

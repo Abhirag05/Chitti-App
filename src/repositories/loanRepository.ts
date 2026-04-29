@@ -16,6 +16,10 @@ export class LoanRepository extends BaseRepository {
     await updateDoc(this.docRef(loanId), { status });
   }
 
+  async deleteLoan(loanId: string): Promise<void> {
+    await this.delete(loanId);
+  }
+
   async getLoanById(ownerId: string, loanId: string): Promise<Loan | null> {
     const loan = await this.getById<Loan>(loanId);
     if (!loan || loan.ownerId !== ownerId) {

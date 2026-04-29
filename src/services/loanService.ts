@@ -1,4 +1,5 @@
 import loanRepository from '@src/repositories/loanRepository';
+import installmentRepository from '@src/repositories/installmentRepository';
 import installmentService from './installmentService';
 import { Loan, LoanCreateInput, LoanDetailView, LoanProgress, LoanSummary, LoanWithProgress } from '@src/models';
 
@@ -123,6 +124,16 @@ class LoanService {
     await installmentService.createInstallments(installments);
 
     return { loan };
+  }
+
+  async deleteLoan(ownerId: string, loanId: string): Promise<void> {
+    const loan = await loanRepository.getLoanById(ownerId, loanId);
+    if (!loan) {
+      throw new Error('Loan not found or access denied');
+    }
+
+    await installmentRepository.deleteInstallmentsByLoan(ownerId, loanId);
+    await loanRepository.deleteLoan(loanId);
   }
 }
 

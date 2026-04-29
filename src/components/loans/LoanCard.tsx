@@ -15,7 +15,7 @@ const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 const LoanCard: React.FC<Props> = ({ loan, onPress }) => {
   return (
     <Pressable onPress={onPress}>
-      <AppCard style={styles.card}>
+      <AppCard style={[styles.card, loan.status === 'completed' && styles.cardCompleted]}>
         <View style={styles.header}>
           <View style={styles.titleBlock}>
             <AppText variant="h3" numberOfLines={1}>
@@ -66,6 +66,12 @@ const LoanCard: React.FC<Props> = ({ loan, onPress }) => {
 const styles = StyleSheet.create({
   card: {
     marginBottom: theme.spacing.sm,
+  },
+  cardCompleted: {
+    backgroundColor: '#f8fafc', // Dim background color for completed cards
+    opacity: 0.85,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   header: {
     flexDirection: 'row',

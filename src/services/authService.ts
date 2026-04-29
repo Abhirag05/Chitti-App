@@ -111,6 +111,7 @@ class AuthService {
     const errorMap: Record<string, string> = {
       'auth/user-not-found': 'User not found. Please check your email.',
       'auth/wrong-password': 'Incorrect password. Please try again.',
+      'auth/invalid-credential': 'Incorrect email or password. Please try again.',
       'auth/invalid-email': 'Invalid email address.',
       'auth/user-disabled': 'This account has been disabled.',
       'auth/email-already-in-use': 'This email is already registered.',

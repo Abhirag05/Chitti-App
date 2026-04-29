@@ -33,6 +33,7 @@ export type InstallmentTrackingItem = InstallmentWithStatus & {
 export type DashboardStats = {
   totalActiveLoans: number;
   totalOutstandingAmount: number;
+  totalProfit: number;
   dueTodayCount: number;
   overdueCount: number;
   completedLoansCount: number;

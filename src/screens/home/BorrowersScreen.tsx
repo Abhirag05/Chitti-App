@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
-import { DrawerActions } from '@react-navigation/native';
+import { DrawerActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '@components/ui/ScreenContainer';
 import AppHeader from '@components/layout/AppHeader';
@@ -54,6 +54,12 @@ const BorrowersScreen: React.FC<Props> = ({ navigation }) => {
     void loadBorrowers();
   }, [user?.uid]);
 
+  useFocusEffect(
+    useCallback(() => {
+      void loadBorrowers();
+    }, [user?.uid])
+  );
+
   const filteredBorrowers = useMemo(() => {
     const term = debouncedSearch.trim().toLowerCase();
     if (!term) {
@@ -81,7 +87,7 @@ const BorrowersScreen: React.FC<Props> = ({ navigation }) => {
           actions={[
             {
               icon: 'person-add',
-              onPress: () => navigation.getParent()?.getParent()?.navigate('AddBorrower' as never),
+              onPress: () => navigation.navigate('AddBorrower' as never),
               accessibilityLabel: 'Add new borrower',
             },
           ]}
@@ -101,7 +107,7 @@ const BorrowersScreen: React.FC<Props> = ({ navigation }) => {
         actions={[
           {
             icon: 'person-add',
-            onPress: () => navigation.getParent()?.getParent()?.navigate('AddBorrower' as never),
+            onPress: () => navigation.navigate('AddBorrower' as never),
             accessibilityLabel: 'Add new borrower',
           },
         ]}
