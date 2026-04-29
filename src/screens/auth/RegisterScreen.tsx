@@ -22,7 +22,9 @@ import { registerSchema, RegisterFormData } from '@utils/validators/authValidato
 import theme from '@theme';
 
 type Props = {
-  navigation: any;
+  navigation: {
+    navigate: (screen: string) => void;
+  };
 };
 
 /**
@@ -35,7 +37,6 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     control,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -46,7 +47,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     },
   });
 
-  const password = watch('password');
+
 
   /**
    * Handle registration

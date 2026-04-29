@@ -12,4 +12,12 @@ export const ENV = {
   FIREBASE_MEASUREMENT_ID: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || extra.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || '',
 };
 
+export const isEnvValid = (): boolean => {
+  return !!(
+    ENV.FIREBASE_API_KEY &&
+    ENV.FIREBASE_PROJECT_ID &&
+    ENV.FIREBASE_APP_ID
+  );
+};
+
 export default ENV;

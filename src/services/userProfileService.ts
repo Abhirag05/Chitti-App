@@ -1,11 +1,8 @@
 import {
-  collection,
   doc,
   getDoc,
   setDoc,
   updateDoc,
-  Timestamp,
-  DocumentReference,
 } from 'firebase/firestore';
 import FirebaseService from './firebase';
 import { UserProfile } from '../types/auth';

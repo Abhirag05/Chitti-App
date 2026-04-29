@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MaterialIcons } from '@expo/vector-icons';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import AppHeader from '@components/layout/AppHeader';
 import ScreenContainer from '@components/ui/ScreenContainer';

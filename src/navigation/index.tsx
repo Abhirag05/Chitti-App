@@ -17,7 +17,6 @@ import ForgotPasswordScreen from '@screens/auth/ForgotPasswordScreen';
 
 // App Screens
 import DashboardScreen from '@screens/home/DashboardScreen';
-import BorrowersScreen from '@screens/home/BorrowersScreen';
 import DueTodayScreen from '@screens/home/DueTodayScreen';
 import OverdueScreen from '@screens/home/OverdueScreen';
 import UpcomingScreen from '@screens/home/UpcomingScreen';
