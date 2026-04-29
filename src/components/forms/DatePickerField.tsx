@@ -34,18 +34,25 @@ const DatePickerField: React.FC<Props> = ({
   const displayValue = useMemo(() => formatDate(value), [value]);
 
   const openPicker = () => {
-    setDraftDate(value);
-    setVisible(true);
+    if (Platform.OS === 'android') {
+      setVisible(true);
+    } else {
+      setDraftDate(value);
+      setVisible(true);
+    }
   };
 
   const closePicker = () => setVisible(false);
 
-  const handleChange = (_event: DateTimePickerEvent, nextDate?: Date) => {
-    if (nextDate) {
-      setDraftDate(nextDate);
-      if (Platform.OS === 'android') {
+  const handleChange = (event: DateTimePickerEvent, nextDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setVisible(false);
+      if (event.type === 'set' && nextDate) {
         onChange(nextDate);
-        closePicker();
+      }
+    } else {
+      if (nextDate) {
+        setDraftDate(nextDate);
       }
     }
   };
@@ -69,26 +76,39 @@ const DatePickerField: React.FC<Props> = ({
 
       {error ? <AppText variant="small" style={styles.error}>{error}</AppText> : null}
 
-      <Modal visible={visible} transparent animationType="slide" onRequestClose={closePicker}>
-        <Pressable style={styles.modalBackdrop} onPress={closePicker}>
-          <Pressable style={styles.modalCard} onPress={() => undefined}>
-            <AppText variant="h3" style={styles.modalTitle}>
-              Select Date
-            </AppText>
-            <DateTimePicker
-              value={draftDate}
-              mode="date"
-              display="spinner"
-              minimumDate={minimumDate}
-              maximumDate={maximumDate}
-              onChange={handleChange}
-            />
-            <Pressable style={styles.confirmButton} onPress={handleConfirm}>
-              <AppText style={styles.confirmText}>Done</AppText>
+      {Platform.OS === 'ios' ? (
+        <Modal visible={visible} transparent animationType="slide" onRequestClose={closePicker}>
+          <Pressable style={styles.modalBackdrop} onPress={closePicker}>
+            <Pressable style={styles.modalCard} onPress={() => undefined}>
+              <AppText variant="h3" style={styles.modalTitle}>
+                Select Date
+              </AppText>
+              <DateTimePicker
+                value={draftDate}
+                mode="date"
+                display="spinner"
+                minimumDate={minimumDate}
+                maximumDate={maximumDate}
+                onChange={handleChange}
+              />
+              <Pressable style={styles.confirmButton} onPress={handleConfirm}>
+                <AppText style={styles.confirmText}>Done</AppText>
+              </Pressable>
             </Pressable>
           </Pressable>
-        </Pressable>
-      </Modal>
+        </Modal>
+      ) : (
+        visible && (
+          <DateTimePicker
+            value={value}
+            mode="date"
+            display="default"
+            minimumDate={minimumDate}
+            maximumDate={maximumDate}
+            onChange={handleChange}
+          />
+        )
+      )}
     </View>
   );
 };
