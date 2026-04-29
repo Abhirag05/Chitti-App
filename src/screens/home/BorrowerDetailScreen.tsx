@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AppHeader from '@components/layout/AppHeader';
@@ -71,6 +71,35 @@ const BorrowerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     [loans]
   );
 
+  const handleDeleteBorrower = async () => {
+    if (!user?.uid || !borrower) return;
+
+    Alert.alert(
+      'Delete Borrower',
+      'Are you sure you want to delete this borrower and all their associated loans and installments? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await borrowerService.deleteBorrower(user.uid, borrower.id);
+              Alert.alert('Success', 'Borrower deleted successfully');
+              navigation.goBack();
+            } catch (error) {
+              console.error('Failed to delete borrower:', error);
+              Alert.alert('Error', 'Failed to delete borrower');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading) {
     return <AppLoader />;
   }
@@ -100,6 +129,18 @@ const BorrowerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         leftIcon="arrow-back"
         leftAccessibilityLabel="Go back"
         onLeftPress={() => navigation.goBack()}
+        actions={[
+          {
+            icon: 'edit',
+            onPress: () => borrower && navigation.navigate('EditBorrower', { borrowerId: borrower.id }),
+            accessibilityLabel: 'Edit borrower',
+          },
+          {
+            icon: 'delete',
+            onPress: handleDeleteBorrower,
+            accessibilityLabel: 'Delete borrower',
+          },
+        ]}
       />
       <ScreenContainer style={styles.container}>
         {borrower ? (

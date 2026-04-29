@@ -35,6 +35,10 @@ export class BorrowerRepository extends BaseRepository {
 
     return borrowers[0] ?? null;
   }
+
+  async deleteBorrower(borrowerId: string): Promise<void> {
+    await this.delete(borrowerId);
+  }
 }
 
 export default new BorrowerRepository();

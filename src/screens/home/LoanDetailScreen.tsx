@@ -82,6 +82,35 @@ const LoanDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     );
   };
 
+  const handleDeleteLoan = async () => {
+    if (!user?.uid || !details) return;
+
+    Alert.alert(
+      'Delete Loan',
+      'Are you sure you want to delete this loan and all its installments? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await loanService.deleteLoan(user.uid, details.loan.id);
+              Alert.alert('Success', 'Loan deleted successfully');
+              navigation.goBack();
+            } catch (error) {
+              console.error('Failed to delete loan:', error);
+              Alert.alert('Error', 'Failed to delete loan');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading) {
     return <AppLoader />;
   }
@@ -111,6 +140,23 @@ const LoanDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         leftIcon="arrow-back"
         leftAccessibilityLabel="Go back"
         onLeftPress={() => navigation.goBack()}
+        actions={[
+          {
+            icon: 'edit',
+            onPress: () =>
+              details &&
+              navigation.navigate('EditLoan', {
+                loanId: details.loan.id,
+                borrowerId: details.loan.borrowerId,
+              }),
+            accessibilityLabel: 'Edit loan',
+          },
+          {
+            icon: 'delete',
+            onPress: handleDeleteLoan,
+            accessibilityLabel: 'Delete loan',
+          },
+        ]}
       />
       <ScreenContainer style={styles.container}>
         {details ? (

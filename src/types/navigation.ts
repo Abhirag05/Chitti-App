@@ -31,6 +31,8 @@ export type BorrowersStackParamList = {
   BorrowersList: undefined;
   BorrowerDetails: { borrowerId: string };
   LoanDetails: { loanId: string; borrowerId: string };
+  EditBorrower: { borrowerId: string };
+  EditLoan: { loanId: string; borrowerId: string };
 };
 
 /**

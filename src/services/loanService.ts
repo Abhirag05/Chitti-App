@@ -135,6 +135,59 @@ class LoanService {
     await installmentRepository.deleteInstallmentsByLoan(ownerId, loanId);
     await loanRepository.deleteLoan(loanId);
   }
+
+  async updateLoan(
+    ownerId: string,
+    loanId: string,
+    input: Omit<LoanCreateInput, 'borrowerId' | 'borrowerName' | 'ownerId'>
+  ): Promise<Loan> {
+    const existing = await loanRepository.getLoanById(ownerId, loanId);
+    if (!existing) {
+      throw new Error('Loan not found or access denied');
+    }
+
+    const summary = this.calculateLoanSummary(
+      input.principalAmount,
+      input.totalRepayableAmount,
+      input.numberOfWeeks
+    );
+
+    const updatedLoan: Loan = {
+      ...existing,
+      principalAmount: roundToTwo(input.principalAmount),
+      totalRepayableAmount: roundToTwo(input.totalRepayableAmount),
+      profitAmount: summary.profitAmount,
+      numberOfWeeks: input.numberOfWeeks,
+      weeklyInstallment: summary.weeklyInstallment,
+      startDate: input.startDate,
+      firstDueDate: input.firstDueDate,
+      notes: input.notes?.trim() || '',
+    };
+
+    await loanRepository.createLoan(updatedLoan);
+
+    // Handle installments: if any are paid, we don't regenerate to avoid data loss.
+    // Otherwise, we regenerate them to reflect the new terms/dates.
+    const installments = await installmentService.getInstallmentsByLoan(ownerId, loanId);
+    const hasPaidInstallments = installments.some((i) => i.status === 'paid');
+
+    if (!hasPaidInstallments) {
+      await installmentRepository.deleteInstallmentsByLoan(ownerId, loanId);
+      const newInstallments = installmentService.generateInstallments({
+        loanId: updatedLoan.id,
+        borrowerId: updatedLoan.borrowerId,
+        borrowerName: updatedLoan.borrowerName,
+        ownerId: updatedLoan.ownerId,
+        numberOfWeeks: updatedLoan.numberOfWeeks,
+        firstDueDate: updatedLoan.firstDueDate,
+        totalRepayableAmount: updatedLoan.totalRepayableAmount,
+        weeklyInstallment: updatedLoan.weeklyInstallment,
+      });
+      await installmentService.createInstallments(newInstallments);
+    }
+
+    return updatedLoan;
+  }
 }
 
 export default new LoanService();

@@ -102,3 +102,61 @@ export const borrowerLoanFormSchema = z
   });
 
 export type BorrowerLoanFormValues = z.infer<typeof borrowerLoanFormSchema>;
+
+export const borrowerFormSchema = z.object({
+  fullName: z.string().min(1, 'Full name is required'),
+  phoneNumber: z.string().min(7, 'Enter a valid phone number').max(15, 'Enter a valid phone number'),
+  address: z.string().min(1, 'Address is required'),
+  reference: z.string().optional().default(''),
+});
+
+export type BorrowerFormValues = z.infer<typeof borrowerFormSchema>;
+
+export const loanEditFormSchema = z
+  .object({
+    principalAmount: currencyString,
+    totalRepayableAmount: currencyString,
+    numberOfWeeks: weeksString,
+    startDate: z.date(),
+    firstDueDate: z.date(),
+    notes: z.string().optional().default(''),
+  })
+  .superRefine((value, context) => {
+    const principalAmount = Number(value.principalAmount);
+    const totalRepayableAmount = Number(value.totalRepayableAmount);
+    const numberOfWeeks = Number(value.numberOfWeeks);
+
+    if (principalAmount <= 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Principal amount must be greater than 0',
+        path: ['principalAmount'],
+      });
+    }
+
+    if (totalRepayableAmount < principalAmount) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Repayable amount must be greater than or equal to principal amount',
+        path: ['totalRepayableAmount'],
+      });
+    }
+
+    if (numberOfWeeks <= 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Weeks must be greater than 0',
+        path: ['numberOfWeeks'],
+      });
+    }
+
+    if (value.firstDueDate < value.startDate) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'First due date cannot be before the given date',
+        path: ['firstDueDate'],
+      });
+    }
+  });
+
+export type LoanEditFormValues = z.infer<typeof loanEditFormSchema>;
