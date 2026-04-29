@@ -25,7 +25,8 @@ class AuthService {
       const result = await signInWithEmailAndPassword(this.auth, email, password);
       return result.user;
     } catch (error: any) {
-      throw new Error(this.getErrorMessage(error.code));
+      const code = this.extractAuthCode(error);
+      throw new Error(this.getErrorMessage(code));
     }
   }
 
@@ -46,7 +47,8 @@ class AuthService {
 
       return user;
     } catch (error: any) {
-      throw new Error(this.getErrorMessage(error.code));
+      const code = this.extractAuthCode(error);
+      throw new Error(this.getErrorMessage(code));
     }
   }
 
@@ -59,7 +61,8 @@ class AuthService {
       const result = await signInWithCredential(this.auth, credential);
       return result.user;
     } catch (error: any) {
-      throw new Error(this.getErrorMessage(error.code));
+      const code = this.extractAuthCode(error);
+      throw new Error(this.getErrorMessage(code));
     }
   }
 
@@ -70,7 +73,8 @@ class AuthService {
     try {
       await sendPasswordResetEmail(this.auth, email);
     } catch (error: any) {
-      throw new Error(this.getErrorMessage(error.code));
+      const code = this.extractAuthCode(error);
+      throw new Error(this.getErrorMessage(code));
     }
   }
 
@@ -81,7 +85,8 @@ class AuthService {
     try {
       await signOut(this.auth);
     } catch (error: any) {
-      throw new Error(this.getErrorMessage(error.code));
+      const code = this.extractAuthCode(error);
+      throw new Error(this.getErrorMessage(code));
     }
   }
 
@@ -102,7 +107,7 @@ class AuthService {
   /**
    * Map Firebase error codes to user-friendly messages
    */
-  private getErrorMessage(code: string): string {
+  private getErrorMessage(code?: string): string {
     const errorMap: Record<string, string> = {
       'auth/user-not-found': 'User not found. Please check your email.',
       'auth/wrong-password': 'Incorrect password. Please try again.',
@@ -115,7 +120,24 @@ class AuthService {
       'auth/network-request-failed': 'Network error. Please check your connection.',
     };
 
+    if (!code) return 'An authentication error occurred. Please try again.';
+
     return errorMap[code] || 'An authentication error occurred. Please try again.';
+  }
+
+  /**
+   * Try to extract a firebase auth code from the thrown error.
+   * Firebase sometimes provides the code on `error.code` or embeds it in `error.message`.
+   */
+  private extractAuthCode(error: any): string | undefined {
+    if (!error) return undefined;
+    if (typeof error.code === 'string' && error.code) return error.code;
+    if (typeof error.message === 'string') {
+      // message formats seen: "Firebase: Error (auth/wrong-password)."
+      const m = error.message.match(/auth\/[a-z-]+/i);
+      if (m) return m[0].toLowerCase();
+    }
+    return undefined;
   }
 }
 

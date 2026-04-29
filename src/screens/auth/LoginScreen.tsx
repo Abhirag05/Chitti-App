@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -31,6 +31,9 @@ type Props = {
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login, loading, error, clearError } = useAuth();
 
+  const [authFieldError, setAuthFieldError] = useState<null | 'email' | 'password' | 'general'>(null);
+  const [authErrorMessage, setAuthErrorMessage] = useState<string | null>(null);
+
   const {
     control,
     handleSubmit,
@@ -56,10 +59,29 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   useEffect(() => {
-    if (error) {
-      Alert.alert('Login Error', error);
-      clearError();
+    if (!error) {
+      setAuthFieldError(null);
+      setAuthErrorMessage(null);
+      return;
     }
+
+    // Map known auth messages to field-level errors for better UX
+    const lower = error.toLowerCase();
+    if (lower.includes('password') || lower.includes('incorrect password') || lower.includes('wrong-password')) {
+      setAuthFieldError('password');
+      setAuthErrorMessage(error);
+    } else if (lower.includes('user not found') || lower.includes('no user') || lower.includes('invalid email')) {
+      setAuthFieldError('email');
+      setAuthErrorMessage(error);
+    } else {
+      // Fallback to alert for other errors
+      setAuthFieldError('general');
+      setAuthErrorMessage(error);
+      Alert.alert('Login Error', error);
+    }
+
+    // keep error in context until user acts; clear after mapping
+    clearError();
   }, [error, clearError]);
 
   return (
@@ -95,7 +117,15 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                       label="Email"
                       placeholder="your@email.com"
                       value={value}
-                      onChangeText={onChange}
+                      onChangeText={(v) => {
+                        onChange(v);
+                        // clear field-level auth errors when user edits
+                        if (authFieldError === 'email') {
+                          setAuthFieldError(null);
+                          setAuthErrorMessage(null);
+                        }
+                        clearError();
+                      }}
                       keyboardType="email-address"
                       editable={!loading}
                     />
@@ -103,6 +133,9 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 />
                 {errors.email && (
                   <AppText style={styles.error}>{errors.email.message}</AppText>
+                )}
+                {authFieldError === 'email' && authErrorMessage && (
+                  <AppText style={styles.error}>{authErrorMessage}</AppText>
                 )}
               </View>
 
@@ -114,13 +147,23 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                   render={({ field: { onChange, value } }) => (
                     <PasswordInput
                       value={value}
-                      onChangeText={onChange}
+                      onChangeText={(v) => {
+                        onChange(v);
+                        if (authFieldError === 'password') {
+                          setAuthFieldError(null);
+                          setAuthErrorMessage(null);
+                        }
+                        clearError();
+                      }}
                       editable={!loading}
                     />
                   )}
                 />
                 {errors.password && (
                   <AppText style={styles.error}>{errors.password.message}</AppText>
+                )}
+                {authFieldError === 'password' && authErrorMessage && (
+                  <AppText style={styles.error}>{authErrorMessage}</AppText>
                 )}
               </View>
 
